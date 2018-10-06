@@ -1,0 +1,35 @@
+{
+  "manifest_version": 2,
+  "name": "Benjamins WISEflow shortcuts",
+  "version": "0.0",
+
+  "icons": {"128": "images/extension_icon.png"},
+
+  "description": "Custom keyboard shortcuts til navigering på WISEflow",
+  "commands": {
+    "to-manager-page": {
+      "suggested_key": {
+        "default": "Alt+M"
+      },
+      "description": "Go to the manager page with the same ID as the Flow you are on."
+    }
+  },
+
+  "background": {
+    "scripts": ["js/background.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://europe.wiseflow.net/*"],
+      "js": [
+        "js/content.js"
+      ]
+    }
+  ],
+
+  "permissions": [
+    "tabs",
+    "activeTab"
+  ]
+}
