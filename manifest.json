@@ -37,6 +37,7 @@
 
   "permissions": [
     "tabs",
-    "activeTab"
+    "activeTab",
+    "notifications"
   ]
 }

@@ -24,12 +24,7 @@ let searchForGoSwitchBack = () => {
     return document.querySelector('a[href="/index.php?switchUser=true"]')
 };
 
-function commandHandler(command, url, id, flowId) {
-
-    if (flowId === "ID missing") {
-        console.log(flowId);
-        return;
-    }
+let commandHandler = (command, url, id, flowId) => {
 
     if (command === "to-manager-page") {
 
@@ -40,22 +35,19 @@ function commandHandler(command, url, id, flowId) {
 
     } else if (command === "to-manager-page-original") {
 
-        console.log("here1")
-
         // Check for switch back user element and go back if necessary
         chrome.tabs.executeScript(id, {
             code: '(' + searchForGoSwitchBack + ')();'
         }, (result) => {
-            console.log("here2")
-            console.log(result[0] !== null)
+
             if (result[0] !== null) {
-                console.log("here3")
+
                 chrome.tabs.update(
                     id,
                     {url: "https://europe.wiseflow.net/index.php?switchUser=true"}
                 )
 
-                let listener = function(tabId, info) {
+                let listener = (tabId, info) => {
                     if (info.status === 'complete' && tabId === id) {
                         chrome.tabs.onUpdated.removeListener(listener);
                         chrome.tabs.update(
@@ -72,9 +64,12 @@ function commandHandler(command, url, id, flowId) {
                     {url: "https://europe.wiseflow.net/manager/display.php?id=" + flowId}
                 )
             }
+
         });
+
     }
-}
+
+};
 
 chrome.commands.onCommand.addListener(function (command) {
 
@@ -88,11 +83,30 @@ chrome.commands.onCommand.addListener(function (command) {
         let id = tab.id;
 
         if (url.search("wiseflow.net") === -1) {
-            console.log("Not WISEflow site.");
+            chrome.notifications.clear("not_wiseflow");
+            chrome.notifications.create("not_wiseflow", {
+                type: "basic",
+                iconUrl: "images/extension_icon.png",
+                title: "Benjamin's WISEflow shortcuts",
+                message: "Not WISEflow site."
+            }, function(notificationId) {});
+
             return;
         }
 
         let flowId = getFlowID(url);
+
+        if (flowId === "ID missing") {
+            chrome.notifications.clear("id_missing");
+            chrome.notifications.create("id_missing", {
+                type: "basic",
+                iconUrl: "images/extension_icon.png",
+                title: "Benjamin's WISEflow shortcuts",
+                message: "No flow ID found."
+            }, function(notificationId) {});
+
+            return;
+        }
 
         commandHandler(command, url, id, flowId)
 
