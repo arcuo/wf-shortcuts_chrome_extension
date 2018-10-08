@@ -7,11 +7,18 @@
 
   "description": "Custom keyboard shortcuts til navigering på WISEflow",
   "commands": {
+    "to-manager-page-original": {
+      "suggested_key": {
+        "default": "Alt+Shift+M"
+      },
+      "description": "Go to the manager page with the original user with the same ID as the Flow you are on."
+    },
+
     "to-manager-page": {
       "suggested_key": {
         "default": "Alt+M"
       },
-      "description": "Go to the manager page with the same ID as the Flow you are on."
+      "description": "Go to the manager page with the current user with the same ID as the Flow you are on."
     }
   },
 
