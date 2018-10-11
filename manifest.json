@@ -4,6 +4,9 @@
   "version": "0.0",
 
   "icons": {"128": "images/extension_icon.png"},
+  "browser_action": {
+    "default_icon": "images/extension_icon.png"
+  },
 
   "description": "Custom keyboard shortcuts til navigering på WISEflow",
   "commands": {
