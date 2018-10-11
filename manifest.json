@@ -19,6 +19,13 @@
         "default": "Alt+M"
       },
       "description": "Go to the manager page with the current user with the same ID as the Flow you are on."
+    },
+
+    "to-super-page-original": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Go to the super page with the original user with the same ID as the Flow you are on."
     }
   },
 

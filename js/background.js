@@ -67,6 +67,40 @@ let commandHandler = (command, url, id, flowId) => {
 
         });
 
+    } else if (command === "to-super-page-original") {
+
+        // Check for switch back user element and go back if necessary
+        chrome.tabs.executeScript(id, {
+            code: '(' + searchForGoSwitchBack + ')();'
+        }, (result) => {
+
+            if (result[0] !== null) {
+
+                chrome.tabs.update(
+                    id,
+                    {url: "https://europe.wiseflow.net/index.php?switchUser=true"}
+                )
+
+                let listener = (tabId, info) => {
+                    if (info.status === 'complete' && tabId === id) {
+                        chrome.tabs.onUpdated.removeListener(listener);
+                        chrome.tabs.update(
+                            id,
+                            {url: "https://europe.wiseflow.net/admin/super/flow/index.php?id=" + flowId}
+                        )
+                    }
+                }
+
+                chrome.tabs.onUpdated.addListener(listener);
+            } else {
+                chrome.tabs.update(
+                    id,
+                    {url: "https://europe.wiseflow.net/admin/super/flow/index.php?id=" + flowId}
+                )
+            }
+
+        });
+
     }
 
 };
