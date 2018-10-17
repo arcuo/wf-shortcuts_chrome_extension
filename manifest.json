@@ -9,18 +9,39 @@
   },
 
   "description": "Custom keyboard shortcuts til navigering på WISEflow",
+
   "commands": {
+
     "to-manager-page-original": {
       "suggested_key": {
-        "default": "Alt+Shift+M"
+        "default": "Alt+M"
       },
       "description": "Go to the manager page with the original user with the same ID as the Flow you are on."
     },
 
-    "to-manager-page": {
+    "to-assessor-page-original": {
       "suggested_key": {
-        "default": "Alt+M"
+        "default": "Alt+A"
       },
+      "description": "Go to the assessor page with the original user with the same ID as the Flow you are on."
+    },
+
+    "to-participant-page-original": {
+      "suggested_key": {
+        "default": "Alt+P"
+      },
+      "description": "Go to the participant page with the original user with the same ID as the Flow you are on."
+    },
+
+    "to-assessor-page": {
+      "description": "Go to the assessor page with the current user with the same ID as the Flow you are on."
+    },
+
+    "to-participant-page": {
+      "description": "Go to the participant page with the current user with the same ID as the Flow you are on."
+    },
+
+    "to-manager-page": {
       "description": "Go to the manager page with the current user with the same ID as the Flow you are on."
     },
 

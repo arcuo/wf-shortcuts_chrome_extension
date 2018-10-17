@@ -20,52 +20,97 @@ let getBranchName = (url) => {
     return re.exec(url)[1];
 };
 
+let isSamePage = (url, role) => {
+    let re = RegExp("wiseflow.net/(.*)/")
+    return role == re.exec(url)[1];
+}
+
 let searchForGoSwitchBack = () => {
     return document.querySelector('a[href="/index.php?switchUser=true"]')
 };
+
+let switchUserGoTo = (id, flowId, role) => {
+    // Check for switch back user element and go back if necessary
+    chrome.tabs.executeScript(id, {
+        code: '(' + searchForGoSwitchBack + ')();'
+    }, (result) => {
+
+        if (result[0] !== null) {
+
+            chrome.tabs.update(
+                id,
+                {url: "https://europe.wiseflow.net/index.php?switchUser=true"}
+            )
+
+            let listener = (tabId, info) => {
+                if (info.status === 'complete' && tabId === id) {
+                    chrome.tabs.onUpdated.removeListener(listener);
+                    chrome.tabs.update(
+                        id,
+                        {url: "https://europe.wiseflow.net/" + role + "/display.php?id=" + flowId}
+                    )
+                }
+            }
+
+            chrome.tabs.onUpdated.addListener(listener);
+        } else {
+            chrome.tabs.update(
+                id,
+                {url: "https://europe.wiseflow.net/" + role + "/display.php?id=" + flowId}
+            )
+        }
+
+    });
+}
 
 let commandHandler = (command, url, id, flowId) => {
 
     if (command === "to-manager-page") {
 
-        chrome.tabs.update(
-            id,
-            {url: "https://europe.wiseflow.net/manager/display.php?id=" + flowId}
-        )
+        if (!isSamePage(url, "manager")) {
+            chrome.tabs.update(
+                id,
+                {url: "https://europe.wiseflow.net/manager/display.php?id=" + flowId}
+            )
+        }
 
     } else if (command === "to-manager-page-original") {
 
-        // Check for switch back user element and go back if necessary
-        chrome.tabs.executeScript(id, {
-            code: '(' + searchForGoSwitchBack + ')();'
-        }, (result) => {
+        if (!isSamePage(url, "manager")) {
+            switchUserGoTo(id, flowId, "manager")
+        }
 
-            if (result[0] !== null) {
+    } else if (command === "to-assessor-page") {
 
-                chrome.tabs.update(
-                    id,
-                    {url: "https://europe.wiseflow.net/index.php?switchUser=true"}
-                )
+        if (!isSamePage(url, "assessor")) {
+            chrome.tabs.update(
+                id,
+                {url: "https://europe.wiseflow.net/assessor/display.php?id=" + flowId}
+            )
+        }
 
-                let listener = (tabId, info) => {
-                    if (info.status === 'complete' && tabId === id) {
-                        chrome.tabs.onUpdated.removeListener(listener);
-                        chrome.tabs.update(
-                            id,
-                            {url: "https://europe.wiseflow.net/manager/display.php?id=" + flowId}
-                        )
-                    }
-                }
+    } else if (command === "to-assessor-page-original") {
 
-                chrome.tabs.onUpdated.addListener(listener);
-            } else {
-                chrome.tabs.update(
-                    id,
-                    {url: "https://europe.wiseflow.net/manager/display.php?id=" + flowId}
-                )
-            }
+        console.log(isSamePage(url, "assessor"));
 
-        });
+        if (!isSamePage(url, "assessor")) {
+            switchUserGoTo(id, flowId, "assessor")
+        }
+
+    } else if (command === "to-participant-page") {
+
+        if (!isSamePage(url, "participant")) {
+            chrome.tabs.update(
+                id,
+                {url: "https://europe.wiseflow.net/participant/display.php?id=" + flowId}
+            )
+        }
+
+    } else if (command === "to-participant-page-original") {
+
+        if (!isSamePage(url, "participant")) {
+            switchUserGoTo(id, flowId, "participant")
+        }
 
     } else if (command === "to-super-page-original") {
 
