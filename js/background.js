@@ -91,8 +91,6 @@ let commandHandler = (command, url, id, flowId) => {
 
     } else if (command === "to-assessor-page-original") {
 
-        console.log(isSamePage(url, "assessor"));
-
         if (!isSamePage(url, "assessor")) {
             switchUserGoTo(id, flowId, "assessor")
         }
