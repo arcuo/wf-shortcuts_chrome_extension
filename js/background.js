@@ -8,13 +8,21 @@ All the shortcut command calls.
 let getFlowID = (url) => {
     let re = RegExp("\\?(flowId|id)=([0-9]*)", "g");
     let flowId = re.exec(url);
-    console.log(flowId);
     if (flowId === null) {
         return "ID missing";
     } else {
         return flowId[2];
     }
 };
+
+let findBranchURL = (url) => {
+	let re = RegExp("(europe|europe-stage|europe-test).wiseflow.net");
+	let branch = re.exec(url);
+	console.log(branch)
+	if (branch !== null) {
+		return branch[0];
+	}
+}
 
 let checkMissingID = (id) => {
 
@@ -33,11 +41,6 @@ let checkMissingID = (id) => {
     return false;
 }
 
-let getBranchName = (url) => {
-    let re = RegExp("europe?-(.*)\.wiseflow");
-    return re.exec(url)[1];
-};
-
 let isSamePage = (url, role) => {
     let re = RegExp("wiseflow.net/(.*)/")
     return role == re.exec(url)[1];
@@ -47,7 +50,7 @@ let searchForGoSwitchBack = () => {
     return document.querySelector('a[href="/index.php?switchUser=true"]')
 };
 
-let switchUserGoTo = (id, flowId, role) => {
+let switchUserGoTo = (id, flowId, role, branch) => {
     // Check for switch back user element and go back if necessary
     chrome.tabs.executeScript(id, {
         code: '(' + searchForGoSwitchBack + ')();'
@@ -57,7 +60,7 @@ let switchUserGoTo = (id, flowId, role) => {
 
             chrome.tabs.update(
                 id,
-                {url: "https://europe.wiseflow.net/index.php?switchUser=true"}
+                {url: "https://" + branch + "/index.php?switchUser=true"}
             )
 
             let listener = (tabId, info) => {
@@ -65,7 +68,7 @@ let switchUserGoTo = (id, flowId, role) => {
                     chrome.tabs.onUpdated.removeListener(listener);
                     chrome.tabs.update(
                         id,
-                        {url: "https://europe.wiseflow.net/" + role + "/display.php?id=" + flowId}
+                        {url: "https://" + branch + "/" + role + "/display.php?id=" + flowId}
                     )
                 }
             }
@@ -74,14 +77,14 @@ let switchUserGoTo = (id, flowId, role) => {
         } else {
             chrome.tabs.update(
                 id,
-                {url: "https://europe.wiseflow.net/" + role + "/display.php?id=" + flowId}
+                {url: "https://" + branch + "/" + role + "/display.php?id=" + flowId}
             )
         }
 
     });
 }
 
-let commandHandler = (command, url, id, flowId) => {
+let commandHandler = (command, url, id, flowId, branch) => {
 
     if (command === "to-manager-page") {
 
@@ -91,7 +94,7 @@ let commandHandler = (command, url, id, flowId) => {
             if (!isSamePage(url, "manager")) {
             chrome.tabs.update(
                 id,
-                {url: "https://europe.wiseflow.net/manager/display.php?id=" + flowId}
+                {url: "https://" + branch + "/manager/display.php?id=" + flowId}
             )
             }
         }
@@ -102,7 +105,7 @@ let commandHandler = (command, url, id, flowId) => {
             return;
         } else {
             if (!isSamePage(url, "manager")) {
-                switchUserGoTo(id, flowId, "manager")
+                switchUserGoTo(id, flowId, "manager", branch)
             }
         }
 
@@ -114,7 +117,7 @@ let commandHandler = (command, url, id, flowId) => {
             if (!isSamePage(url, "assessor")) {
             chrome.tabs.update(
                 id,
-                {url: "https://europe.wiseflow.net/assessor/display.php?id=" + flowId}
+                {url: "https://" + branch + "/manager/display.php?id=" + flowId}
             )
             }
         }
@@ -127,7 +130,7 @@ let commandHandler = (command, url, id, flowId) => {
         } else {
             console.log("here2")
             if (!isSamePage(url, "assessor")) {
-            switchUserGoTo(id, flowId, "assessor")
+            switchUserGoTo(id, flowId, "assessor", branch)
             }
         }
 
@@ -139,7 +142,7 @@ let commandHandler = (command, url, id, flowId) => {
             if (!isSamePage(url, "participant")) {
             chrome.tabs.update(
                 id,
-                {url: "https://europe.wiseflow.net/participant/display.php?id=" + flowId}
+                {url: "https://" + branch + "/manager/display.php?id=" + flowId}
             )
             }
         }
@@ -150,7 +153,7 @@ let commandHandler = (command, url, id, flowId) => {
             return;
         } else {
             if (!isSamePage(url, "participant")) {
-            switchUserGoTo(id, flowId, "participant")
+            switchUserGoTo(id, flowId, "participant", branch)
             }
         }
 
@@ -159,7 +162,7 @@ let commandHandler = (command, url, id, flowId) => {
         if (checkMissingID(flowId)) {
             chrome.tabs.update(
                             id,
-                            {url: "https://europe.wiseflow.net/admin/super"}
+                            {url: "https://" + branch + "/admin/super"}
                         )
             return;
         } else {
@@ -174,7 +177,7 @@ let commandHandler = (command, url, id, flowId) => {
 
                     chrome.tabs.update(
                         id,
-                        {url: "https://europe.wiseflow.net/index.php?switchUser=true"}
+                        {url: "https://" + branch + "/index.php?switchUser=true"}
                     )
 
                     let listener = (tabId, info) => {
@@ -182,7 +185,7 @@ let commandHandler = (command, url, id, flowId) => {
                             chrome.tabs.onUpdated.removeListener(listener);
                             chrome.tabs.update(
                                 id,
-                                {url: "https://europe.wiseflow.net/admin/super/flow/index.php?id=" + flowId}
+                                {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
                             )
                         }
                     }
@@ -191,7 +194,7 @@ let commandHandler = (command, url, id, flowId) => {
                 } else {
                     chrome.tabs.update(
                         id,
-                        {url: "https://europe.wiseflow.net/admin/super/flow/index.php?id=" + flowId}
+                        {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
                     )
                 }
 
@@ -205,8 +208,8 @@ let commandHandler = (command, url, id, flowId) => {
 
 console.log("initiate");
 
-chrome.commands.onCommand.addListener(function (command) {
 
+chrome.commands.onCommand.addListener(function (command) {
 
 	console.log("command");
 	console.log(command);
@@ -233,10 +236,12 @@ chrome.commands.onCommand.addListener(function (command) {
         }
 
         let flowId = getFlowID(url);
+        let branch = findBranchURL(url);
 
-        commandHandler(command, url, id, flowId)
+        commandHandler(command, url, id, flowId, branch)
 
     });
+
 
 });
 

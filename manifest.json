@@ -14,35 +14,36 @@
 
     "to-manager-page-original": {
       "suggested_key": {
-        "default": "Alt+Shift+N"
+        "default": "Alt+Shift+2"
       },
       "description": "Go to the manager page with the original user with the same ID as the Flow you are on."
     },
 
     "to-assessor-page-original": {
       "suggested_key": {
-        "default": "Alt+Shift+A"
+        "default": "Alt+Shift+3"
       },
       "description": "Go to the assessor page with the original user with the same ID as the Flow you are on."
     },
 
     "to-participant-page-original": {
       "suggested_key": {
-        "default": "Alt+Shift+P"
+        "default": "Alt+Shift+4"
       },
       "description": "Go to the participant page with the original user with the same ID as the Flow you are on."
     },
 
     "to-super-page-original": {
       "suggested_key": {
-        "default": "Alt+Shift+Z"
+        "default": "Alt+Shift+1"
       },
       "description": "Go to the super page with the original user with the same ID as the Flow you are on."
     }
   },
 
   "background": {
-    "scripts": ["js/background.js"]
+    "scripts": ["js/background.js"],
+    "persistent": true
   },
 
   "content_scripts": [
