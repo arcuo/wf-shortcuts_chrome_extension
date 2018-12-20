@@ -50,6 +50,10 @@ let searchForGoSwitchBack = () => {
     return document.querySelector('a[href="/index.php?switchUser=true"]')
 };
 
+let superFieldFocus = () => {
+    document.querySelector('input[id="flowid"]').focus().select();
+};
+
 let switchUserGoTo = (id, flowId, role, branch) => {
     // Check for switch back user element and go back if necessary
     chrome.tabs.executeScript(id, {
@@ -83,6 +87,8 @@ let switchUserGoTo = (id, flowId, role, branch) => {
 
     });
 }
+
+
 
 let commandHandler = (command, url, id, flowId, branch) => {
 
@@ -173,6 +179,8 @@ let commandHandler = (command, url, id, flowId, branch) => {
             code: '(' + searchForGoSwitchBack + ')();'
             }, (result) => {
 
+                console.log(result);
+
                 if (result[0] !== null) {
 
                     chrome.tabs.update(
@@ -187,6 +195,17 @@ let commandHandler = (command, url, id, flowId, branch) => {
                                 id,
                                 {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
                             )
+                            console.log('here')
+
+                            let focusListener = (tabId, info) => {
+                                if (info.status === 'complete' && tabId === id) {
+                                    chrome.tabs.onUpdated.removeListener(focusListener);
+                                    chrome.tabs.executeScript(id, {
+                                        code: '(' + superFieldFocus + ')();'
+                                    });
+                                }
+                            }
+                            chrome.tabs.onUpdated.addListener(focusListener);
                         }
                     }
 
