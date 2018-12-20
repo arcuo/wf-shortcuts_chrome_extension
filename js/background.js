@@ -11,32 +11,51 @@ let getFlowID = (url) => {
     if (flowId === null) {
         return "ID missing";
     } else {
+        savedId = flowId[2]
         return flowId[2];
     }
 };
 
 let findBranchURL = (url) => {
-	let re = RegExp("(europe|europe-stage|europe-test).wiseflow.net");
-	let branch = re.exec(url);
-	console.log(branch)
-	if (branch !== null) {
-		return branch[0];
-	}
+    let re = RegExp("(europe|europe-stage|europe-test).wiseflow.net");
+    let branch = re.exec(url);
+    console.log(branch)
+    if (branch !== null) {
+        return branch[0];
+    }
+}
+
+let useSavedID = (id) => {
+    if (id === "ID missing" && savedId !== null) {
+        chrome.notifications.clear("id_missing");
+        chrome.notifications.create("id_missing", {
+            type: "basic",
+            iconUrl: "images/extension_icon.png",
+            title: "Benjamin's WISEflow shortcuts",
+            message: "No flow ID found, using saved ID"
+        }, function (notificationId) {
+        });
+        return true;
+    }
+    return false;
 }
 
 let checkMissingID = (id) => {
 
     if (id === "ID missing") {
-            chrome.notifications.clear("id_missing");
-            chrome.notifications.create("id_missing", {
-                type: "basic",
-                iconUrl: "images/extension_icon.png",
-                title: "Benjamin's WISEflow shortcuts",
-                message: "No flow ID found."
-            }, function(notificationId) {});
 
-            return true;
-        }
+        chrome.notifications.clear("id_missing");
+        chrome.notifications.create("id_missing", {
+            type: "basic",
+            iconUrl: "images/extension_icon.png",
+            title: "Benjamin's WISEflow shortcuts",
+            message: "No flow ID found."
+        }, function (notificationId) {
+        });
+
+        return true;
+
+    }
 
     return false;
 }
@@ -98,10 +117,10 @@ let commandHandler = (command, url, id, flowId, branch) => {
             return;
         } else {
             if (!isSamePage(url, "manager")) {
-            chrome.tabs.update(
-                id,
-                {url: "https://" + branch + "/manager/display.php?id=" + flowId}
-            )
+                chrome.tabs.update(
+                    id,
+                    {url: "https://" + branch + "/manager/display.php?id=" + flowId}
+                )
             }
         }
 
@@ -121,10 +140,10 @@ let commandHandler = (command, url, id, flowId, branch) => {
             return;
         } else {
             if (!isSamePage(url, "assessor")) {
-            chrome.tabs.update(
-                id,
-                {url: "https://" + branch + "/manager/display.php?id=" + flowId}
-            )
+                chrome.tabs.update(
+                    id,
+                    {url: "https://" + branch + "/manager/display.php?id=" + flowId}
+                )
             }
         }
 
@@ -136,7 +155,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
         } else {
             console.log("here2")
             if (!isSamePage(url, "assessor")) {
-            switchUserGoTo(id, flowId, "assessor", branch)
+                switchUserGoTo(id, flowId, "assessor", branch)
             }
         }
 
@@ -146,10 +165,10 @@ let commandHandler = (command, url, id, flowId, branch) => {
             return;
         } else {
             if (!isSamePage(url, "participant")) {
-            chrome.tabs.update(
-                id,
-                {url: "https://" + branch + "/manager/display.php?id=" + flowId}
-            )
+                chrome.tabs.update(
+                    id,
+                    {url: "https://" + branch + "/manager/display.php?id=" + flowId}
+                )
             }
         }
 
@@ -159,7 +178,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
             return;
         } else {
             if (!isSamePage(url, "participant")) {
-            switchUserGoTo(id, flowId, "participant", branch)
+                switchUserGoTo(id, flowId, "participant", branch)
             }
         }
 
@@ -167,16 +186,16 @@ let commandHandler = (command, url, id, flowId, branch) => {
 
         if (checkMissingID(flowId)) {
             chrome.tabs.update(
-                            id,
-                            {url: "https://" + branch + "/admin/super"}
-                        )
+                id,
+                {url: "https://" + branch + "/admin/super"}
+            )
             return;
         } else {
 
             // Check for switch back user element and go back if necessary
 
             chrome.tabs.executeScript(id, {
-            code: '(' + searchForGoSwitchBack + ')();'
+                code: '(' + searchForGoSwitchBack + ')();'
             }, (result) => {
 
                 console.log(result);
@@ -227,11 +246,12 @@ let commandHandler = (command, url, id, flowId, branch) => {
 
 console.log("initiate");
 
+let savedId = null;
 
 chrome.commands.onCommand.addListener(function (command) {
 
-	console.log("command");
-	console.log(command);
+    console.log("command");
+    console.log(command);
 
     chrome.tabs.query({
         active: true,
@@ -249,12 +269,16 @@ chrome.commands.onCommand.addListener(function (command) {
                 iconUrl: "images/extension_icon.png",
                 title: "Benjamin's WISEflow shortcuts",
                 message: "Not WISEflow site."
-            }, function(notificationId) {});
+            }, function (notificationId) {
+            });
 
             return;
         }
 
         let flowId = getFlowID(url);
+        if (useSavedID(flowId)) {
+            flowId = savedId;
+        }
         let branch = findBranchURL(url);
 
         commandHandler(command, url, id, flowId, branch)
