@@ -198,7 +198,14 @@ let commandHandler = (command, url, id, flowId, branch) => {
                 code: '(' + searchForGoSwitchBack + ')();'
             }, (result) => {
 
-                console.log(result);
+                let focusListener = (tabId, info) => {
+                    if (info.status === 'complete' && tabId === id) {
+                        chrome.tabs.onUpdated.removeListener(focusListener);
+                        chrome.tabs.executeScript(id, {
+                            code: '(' + superFieldFocus + ')();'
+                        });
+                    }
+                }
 
                 if (result[0] !== null) {
 
@@ -216,14 +223,6 @@ let commandHandler = (command, url, id, flowId, branch) => {
                             )
                             console.log('here')
 
-                            let focusListener = (tabId, info) => {
-                                if (info.status === 'complete' && tabId === id) {
-                                    chrome.tabs.onUpdated.removeListener(focusListener);
-                                    chrome.tabs.executeScript(id, {
-                                        code: '(' + superFieldFocus + ')();'
-                                    });
-                                }
-                            }
                             chrome.tabs.onUpdated.addListener(focusListener);
                         }
                     }
@@ -234,6 +233,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
                         id,
                         {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
                     )
+                    chrome.tabs.onUpdated.addListener(focusListener);
                 }
 
             });
