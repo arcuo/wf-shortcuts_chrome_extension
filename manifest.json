@@ -12,6 +12,13 @@
 
   "commands": {
 
+    "to-super-page-original": {
+      "suggested_key": {
+        "default": "Alt+Shift+1"
+      },
+      "description": "Go to the super page with the original user with the same ID as the Flow you are on."
+    },
+
     "to-manager-page-original": {
       "suggested_key": {
         "default": "Alt+Shift+2"
@@ -33,12 +40,6 @@
       "description": "Go to the participant page with the original user with the same ID as the Flow you are on."
     },
 
-    "to-super-page-original": {
-      "suggested_key": {
-        "default": "Alt+Shift+1"
-      },
-      "description": "Go to the super page with the original user with the same ID as the Flow you are on."
-    }
   },
 
   "background": {
