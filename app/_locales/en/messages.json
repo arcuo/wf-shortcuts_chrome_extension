@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "WF shortcuts",
+    "description": "The name of the application"
+  },
+  "appShortName": {
+    "message": "WF Shortcuts",
+    "description": "The short_name (maximum of 12 characters recommended) is a short version of the app's name."
+  },
+  "appDescription": {
+    "message": "Custom keyboard shortcuts for navigating WISEflow roles and pages.",
+    "description": "The description of the application"
+  },
+  "browserActionTitle": {
+    "message": "WF shortcuts",
+    "description": "The title of the browser action button"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "name": "__MSG_appName__",
+  "short_name": "__MSG_appShortName__",
+  "description": "__MSG_appDescription__",
+  "version": "0.0.0",
+  "manifest_version": 2,
+  "default_locale": "en",
+  "icons": {
+    "16": "images/extension_icon.png",
+    "128": "images/extension_icon.png"
+  },
+  "background": {
+    "scripts": [
+      "scripts/background.js"
+    ],
+      "persistent": true
+  },
+
+  "commands": {
+
+    "to-super-page-original": {
+      "suggested_key": {
+        "default": "Alt+Shift+1"
+      },
+      "description": "Go to the super page with the original user with the same ID as the Flow you are on."
+    },
+
+    "to-manager-page-original": {
+      "suggested_key": {
+        "default": "Alt+Shift+2"
+      },
+      "description": "Go to the manager page with the original user with the same ID as the Flow you are on."
+    },
+
+    "to-assessor-page-original": {
+      "suggested_key": {
+        "default": "Alt+Shift+3"
+      },
+      "description": "Go to the assessor page with the original user with the same ID as the Flow you are on."
+    },
+
+    "to-participant-page-original": {
+      "suggested_key": {
+        "default": "Alt+Shift+4"
+      },
+      "description": "Go to the participant page with the original user with the same ID as the Flow you are on."
+    }
+
+  },
+  
+  "browser_action": {
+    "default_icon": {
+      "19": "images/extension_icon.png",
+      "38": "images/extension_icon.png"
+    },
+    "default_title": "__MSG_browserActionTitle__",
+    "default_popup": "pages/popup.html"
+  },
+  "options_page": "pages/options.html",
+  "options_ui": {
+    "page": "pages/options.html",
+    "chrome_style": true
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.wiseflow.net/*"],
+      "css": [
+        "styles/contentscript.css"
+      ],
+      "js": [
+        "scripts/contentscript.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+  "permissions": [
+    "contentSettings",
+    "notifications",
+    "tabs",
+    "activeTab"
+  ]
+}
