@@ -44,6 +44,10 @@
         "default": "Alt+Shift+4"
       },
       "description": "Go to the participant page with the original user with the same ID as the Flow you are on."
+    },
+
+    "switch-back-to-own-user": {
+      "description": "Go back to you own user"
     }
 
   },
@@ -68,14 +72,17 @@
         "styles/contentscript.css"
       ],
       "js": [
+        "vendor/mousetrap.min.js",
         "scripts/contentscript.js"
       ],
       "run_at": "document_end",
-      "all_frames": false
+      "all_frames": true,
+      "match_about_blank": true
     }
   ],
   "permissions": [
     "contentSettings",
+    "storage",
     "notifications",
     "tabs",
     "activeTab"

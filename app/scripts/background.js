@@ -3,8 +3,7 @@
 
 /*
 All the shortcut command calls.
- */
-//TODO: Make work with stage and test.
+*/
 //TODO: make options page to change shortcuts.
 //TODO: Check for deleting content (also from manifest).
 
@@ -73,6 +72,7 @@ let searchForGoSwitchBack = () => {
 };
 
 let superFieldFocus = () => {
+console.log(document);
   document.querySelector('input[id="flowid"]').focus().select();
 };
 
@@ -108,6 +108,39 @@ let switchUserGoTo = (id, flowId, role, branch) => {
       }
 
   });
+}
+
+let handleAction = (command) => {
+    
+    chrome.tabs.query({
+        active: true,
+        currentWindow: true
+    }, function (tabs) {
+  
+        let tab = tabs[0];
+        let url = tab.url;
+        let id = tab.id;
+  
+        if (url.search("wiseflow.net") === -1) {
+            chrome.notifications.clear("not_wiseflow");
+            chrome.notifications.create("not_wiseflow", {
+                type: "basic",
+                iconUrl: "images/extension_icon.png",
+                title: "Benjamin's WISEflow shortcuts",
+                message: "Not WISEflow site."
+            }, function (notificationId) {
+            });
+            return;
+        }
+  
+        let flowId = getFlowID(url);
+        if (useSavedID(flowId)) {
+            flowId = savedId;
+        }
+        let branch = findBranchURL(url);
+
+    commandHandler(command, url, id, flowId, branch);
+    });
 }
 
 
@@ -153,10 +186,8 @@ let commandHandler = (command, url, id, flowId, branch) => {
   } else if (command === "to-assessor-page-original") {
 
       if (checkMissingID(flowId)) {
-          console.log("here1")
           return;
       } else {
-          console.log("here2")
           if (!isSamePage(url, "assessor")) {
               switchUserGoTo(id, flowId, "assessor", branch)
           }
@@ -192,7 +223,6 @@ let commandHandler = (command, url, id, flowId, branch) => {
               id,
               {url: "https://" + branch + "/admin/super"}
           )
-          superFieldFocus();
           return;
       } else {
 
@@ -225,7 +255,6 @@ let commandHandler = (command, url, id, flowId, branch) => {
                               id,
                               {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
                           )
-                          console.log('here')
 
                           chrome.tabs.onUpdated.addListener(focusListener);
                       }
@@ -248,48 +277,24 @@ let commandHandler = (command, url, id, flowId, branch) => {
 
 };
 
-console.log("initiate");
+console.log("Background script initiated");
 
 let savedId = null;
+let test_shortcut = {key: "ctrl+shift+6", action: "switch-to-own-user"};
 
 chrome.commands.onCommand.addListener(function (command) {
-
-  console.log("command");
-  console.log(command);
-
-  chrome.tabs.query({
-      active: true,
-      currentWindow: true
-  }, function (tabs) {
-
-      let tab = tabs[0];
-      let url = tab.url;
-      let id = tab.id;
-
-      if (url.search("wiseflow.net") === -1) {
-          chrome.notifications.clear("not_wiseflow");
-          chrome.notifications.create("not_wiseflow", {
-              type: "basic",
-              iconUrl: "images/extension_icon.png",
-              title: "Benjamin's WISEflow shortcuts",
-              message: "Not WISEflow site."
-          }, function (notificationId) {
-          });
-
-          return;
-      }
-
-      let flowId = getFlowID(url);
-      if (useSavedID(flowId)) {
-          flowId = savedId;
-      }
-      let branch = findBranchURL(url);
-
-      commandHandler(command, url, id, flowId, branch)
-
-  });
-
-
+    console.log("Recieved command: " + command);
+    handleAction(command);
 });
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    const action = request.action;
+    if (action === 'getShortcuts' ) {
+        console.log("Recieved request for shortcuts")
+        console.log("Sending shortcuts for binding")
+        let shortcuts = [test_shortcut];
+        sendResponse(shortcuts);
+    }
+})
 
 
