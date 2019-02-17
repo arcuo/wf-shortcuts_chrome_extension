@@ -259,6 +259,9 @@ console.log("Background script initiated");
 let savedId = null;
 let test_shortcut = {key: "alt+shift+6", action: "switch-to-own-user"};
 
+//chrome.storage.local.set({'shortcuts': JSON.stringify(test_shortcut)})
+localStorage.shortcuts = JSON.stringify(test_shortcut);
+
 chrome.commands.onCommand.addListener(function (command) {
     console.log("Recieved action: " + command);
     handleAction(command);
@@ -270,7 +273,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (action === 'getShortcuts' ) {
         console.log("Recieved request for shortcuts")
         console.log("Sending shortcuts for binding")
-        let shortcuts = [test_shortcut];
+        let shortcuts = JSON.parse(localStorage.shortcuts);
         sendResponse(shortcuts);
     } else {
         handleAction(action)
