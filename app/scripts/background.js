@@ -21,7 +21,6 @@ let getFlowID = (url) => {
 let findBranchURL = (url) => {
   let re = RegExp("(europe|europe-stage|europe-test).wiseflow.net");
   let branch = re.exec(url);
-  console.log(branch)
   if (branch !== null) {
       return branch[0];
   }
@@ -72,42 +71,55 @@ let searchForGoSwitchBack = () => {
 };
 
 let superFieldFocus = () => {
-console.log(document);
   document.querySelector('input[id="flowid"]').focus().select();
 };
 
-let switchUserGoTo = (id, flowId, role, branch) => {
+let resetUser = (id, branch) => {
+    // Check for switch back user element and go back if necessary
+    chrome.tabs.executeScript(id, {
+        code: '(' + searchForGoSwitchBack + ')();'
+    }, result => {
+        if (result[0] !== null) {
+            chrome.tabs.update(
+                id,
+                {url: "https://" + branch + "/index.php?switchUser=true"}
+            )
+        }
+    });
+}
+
+let resetUserGoTo = (id, flowId, role, branch) => {
   // Check for switch back user element and go back if necessary
   chrome.tabs.executeScript(id, {
       code: '(' + searchForGoSwitchBack + ')();'
-  }, (result) => {
+    }, (result) => {
+        
+        if (result[0] !== null) {
 
-      if (result[0] !== null) {
+            chrome.tabs.update(
+                id,
+                {url: "https://" + branch + "/index.php?switchUser=true"}
+            )
 
-          chrome.tabs.update(
-              id,
-              {url: "https://" + branch + "/index.php?switchUser=true"}
-          )
+            let listener = (tabId, info) => {
+                if (info.status === 'complete' && tabId === id) {
+                    chrome.tabs.onUpdated.removeListener(listener);
+                    chrome.tabs.update(
+                        id,
+                        {url: "https://" + branch + "/" + role + "/display.php?id=" + flowId}
+                    )
+                }
+            }
 
-          let listener = (tabId, info) => {
-              if (info.status === 'complete' && tabId === id) {
-                  chrome.tabs.onUpdated.removeListener(listener);
-                  chrome.tabs.update(
-                      id,
-                      {url: "https://" + branch + "/" + role + "/display.php?id=" + flowId}
-                  )
-              }
-          }
+            chrome.tabs.onUpdated.addListener(listener);
+        } else {
+            chrome.tabs.update(
+                id,
+                {url: "https://" + branch + "/" + role + "/display.php?id=" + flowId}
+            )
+        }
 
-          chrome.tabs.onUpdated.addListener(listener);
-      } else {
-          chrome.tabs.update(
-              id,
-              {url: "https://" + branch + "/" + role + "/display.php?id=" + flowId}
-          )
-      }
-
-  });
+    });
 }
 
 let handleAction = (command) => {
@@ -147,153 +159,121 @@ let handleAction = (command) => {
 
 let commandHandler = (command, url, id, flowId, branch) => {
 
-  if (command === "to-manager-page") {
+    switch(command) {
 
-      if (checkMissingID(flowId)) {
-          return;
-      } else {
-          if (!isSamePage(url, "manager")) {
-              chrome.tabs.update(
-                  id,
-                  {url: "https://" + branch + "/manager/display.php?id=" + flowId}
-              )
-          }
-      }
+        case "to-manager-page-original":
+            if (checkMissingID(flowId)) {
+                return;
+            } else {
+                if (!isSamePage(url, "manager")) {
+                    resetUserGoTo(id, flowId, "manager", branch)
+                }
+            }
+            break;
+        
+        case "to-assessor-page-original":
+            if (checkMissingID(flowId)) {
+                return;
+            } else {
+                if (!isSamePage(url, "assessor")) {
+                    resetUserGoTo(id, flowId, "assessor", branch)
+                }
+            }
+            break;
 
-  } else if (command === "to-manager-page-original") {
+        case "to-participant-page-original":
+            if (checkMissingID(flowId)) {
+                return;
+            } else {
+                if (!isSamePage(url, "participant")) {
+                    resetUserGoTo(id, flowId, "participant", branch)
+                }
+            }
+            break;
+        
+        case "to-super-page-original":
+            if (checkMissingID(flowId)) {
+                chrome.tabs.update(
+                    id,
+                    {url: "https://" + branch + "/admin/super"}
+                )
+                return;
+            } else {
+    
+                // Check for switch back user element and go back if necessary
+    
+                chrome.tabs.executeScript(id, {
+                    code: '(' + searchForGoSwitchBack + ')();'
+                }, (result) => {
+    
+                    let focusListener = (tabId, info) => {
+                        if (info.status === 'complete' && tabId === id) {
+                            chrome.tabs.onUpdated.removeListener(focusListener);
+                            chrome.tabs.executeScript(id, {
+                                code: '(' + superFieldFocus + ')();'
+                            });
+                        }
+                    }
+    
+                    if (result[0] !== null) {
+    
+                        chrome.tabs.update(
+                            id,
+                            {url: "https://" + branch + "/index.php?switchUser=true"}
+                        )
+    
+                        let listener = (tabId, info) => {
+                            if (info.status === 'complete' && tabId === id) {
+                                chrome.tabs.onUpdated.removeListener(listener);
+                                chrome.tabs.update(
+                                    id,
+                                    {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
+                                )
+    
+                                chrome.tabs.onUpdated.addListener(focusListener);
+                            }
+                        }
+    
+                        chrome.tabs.onUpdated.addListener(listener);
+                    } else {
+                        chrome.tabs.update(
+                            id,
+                            {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
+                        )
+                        chrome.tabs.onUpdated.addListener(focusListener);
+                    }
+    
+                });
+    
+            }
+            break;
 
-      if (checkMissingID(flowId)) {
-          return;
-      } else {
-          if (!isSamePage(url, "manager")) {
-              switchUserGoTo(id, flowId, "manager", branch)
-          }
-      }
+        case "switch-to-own-user":
+            resetUser(id, branch);    
 
-  } else if (command === "to-assessor-page") {
-
-      if (checkMissingID(flowId)) {
-          return;
-      } else {
-          if (!isSamePage(url, "assessor")) {
-              chrome.tabs.update(
-                  id,
-                  {url: "https://" + branch + "/manager/display.php?id=" + flowId}
-              )
-          }
-      }
-
-  } else if (command === "to-assessor-page-original") {
-
-      if (checkMissingID(flowId)) {
-          return;
-      } else {
-          if (!isSamePage(url, "assessor")) {
-              switchUserGoTo(id, flowId, "assessor", branch)
-          }
-      }
-
-  } else if (command === "to-participant-page") {
-
-      if (checkMissingID(flowId)) {
-          return;
-      } else {
-          if (!isSamePage(url, "participant")) {
-              chrome.tabs.update(
-                  id,
-                  {url: "https://" + branch + "/manager/display.php?id=" + flowId}
-              )
-          }
-      }
-
-  } else if (command === "to-participant-page-original") {
-
-      if (checkMissingID(flowId)) {
-          return;
-      } else {
-          if (!isSamePage(url, "participant")) {
-              switchUserGoTo(id, flowId, "participant", branch)
-          }
-      }
-
-  } else if (command === "to-super-page-original") {
-
-      if (checkMissingID(flowId)) {
-          chrome.tabs.update(
-              id,
-              {url: "https://" + branch + "/admin/super"}
-          )
-          return;
-      } else {
-
-          // Check for switch back user element and go back if necessary
-
-          chrome.tabs.executeScript(id, {
-              code: '(' + searchForGoSwitchBack + ')();'
-          }, (result) => {
-
-              let focusListener = (tabId, info) => {
-                  if (info.status === 'complete' && tabId === id) {
-                      chrome.tabs.onUpdated.removeListener(focusListener);
-                      chrome.tabs.executeScript(id, {
-                          code: '(' + superFieldFocus + ')();'
-                      });
-                  }
-              }
-
-              if (result[0] !== null) {
-
-                  chrome.tabs.update(
-                      id,
-                      {url: "https://" + branch + "/index.php?switchUser=true"}
-                  )
-
-                  let listener = (tabId, info) => {
-                      if (info.status === 'complete' && tabId === id) {
-                          chrome.tabs.onUpdated.removeListener(listener);
-                          chrome.tabs.update(
-                              id,
-                              {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
-                          )
-
-                          chrome.tabs.onUpdated.addListener(focusListener);
-                      }
-                  }
-
-                  chrome.tabs.onUpdated.addListener(listener);
-              } else {
-                  chrome.tabs.update(
-                      id,
-                      {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
-                  )
-                  chrome.tabs.onUpdated.addListener(focusListener);
-              }
-
-          });
-
-      }
-
-  }
-
+    }
 };
 
 console.log("Background script initiated");
 
 let savedId = null;
-let test_shortcut = {key: "ctrl+shift+6", action: "switch-to-own-user"};
+let test_shortcut = {key: "alt+shift+6", action: "switch-to-own-user"};
 
 chrome.commands.onCommand.addListener(function (command) {
-    console.log("Recieved command: " + command);
+    console.log("Recieved action: " + command);
     handleAction(command);
 });
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    const action = request.action;
+    let action = request.action;
+    console.log("Recieved action: " + action)
     if (action === 'getShortcuts' ) {
         console.log("Recieved request for shortcuts")
         console.log("Sending shortcuts for binding")
         let shortcuts = [test_shortcut];
         sendResponse(shortcuts);
+    } else {
+        handleAction(action)
     }
 })
 
