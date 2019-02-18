@@ -257,10 +257,12 @@ let commandHandler = (command, url, id, flowId, branch) => {
 console.log("Background script initiated");
 
 let savedId = null;
-let test_shortcut = {key: "alt+shift+6", action: "switch-to-own-user"};
 
-//chrome.storage.local.set({'shortcuts': JSON.stringify(test_shortcut)})
-localStorage.shortcuts = JSON.stringify(test_shortcut);
+// Testing storage of keys.
+let test_storage = {"switch-to-own-user": "alt+shift+6"};
+
+localStorage.clear()
+localStorage.shortcuts = JSON.stringify(test_storage);
 
 chrome.commands.onCommand.addListener(function (command) {
     console.log("Recieved action: " + command);
@@ -268,15 +270,15 @@ chrome.commands.onCommand.addListener(function (command) {
 });
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    let action = request.action;
-    console.log("Recieved action: " + action)
-    if (action === 'getShortcuts' ) {
+    let message = request.message;
+    console.log("Recieved action: " + message)
+    if (message === 'getShortcuts' ) {
         console.log("Recieved request for shortcuts")
         console.log("Sending shortcuts for binding")
         let shortcuts = JSON.parse(localStorage.shortcuts);
         sendResponse(shortcuts);
     } else {
-        handleAction(action)
+        handleAction(message)
     }
 })
 

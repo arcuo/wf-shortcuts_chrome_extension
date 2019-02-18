@@ -12,15 +12,16 @@ let log = function(){
 // import 'chromereload/devonly'
 
 let WFshortcuts = {};
+var shortcuts = {};
 
-WFshortcuts.activateKey = (shortcut) => {
-    log("WF-Shortcuts: Binding " + shortcut.key + " to action: " + shortcut.action)
-    let action = function() {
-        log("WF-Shortcuts: Caught shortcut! Sending to background script.")
-        chrome.runtime.sendMessage(shortcut);
+WFshortcuts.activateKey = (action) => {
+    log("WF-Shortcuts: Binding " + shortcuts[action] + " to action: " + action)
+    let sendAction = function() {
+        log("WF-Shortcuts: Caught shortcut! Sending " + action + " to background script.")
+        chrome.runtime.sendMessage({message: action});
         return false;
     }
-    Mousetrap.bind(shortcut.key, action)
+    Mousetrap.bind(shortcuts[action], sendAction)
 }
 
 // Listen for messages
@@ -35,12 +36,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 // Request shortcuts and bind with Mousetrap.
 log("WF-Shortcuts: Requesting shortcuts for binding.")
-chrome.runtime.sendMessage({action: 'getShortcuts'}, function (response) {
+chrome.runtime.sendMessage({message: 'getShortcuts'}, function (response) {
     if (response) {
-        let shortcuts = response;
-        if (shortcuts.length > 0) {
-            shortcuts.forEach(shortcut => {
-                WFshortcuts.activateKey(shortcut)
+        shortcuts = response;
+        if (Object.keys(response).length > 0) {
+            Object.keys(shortcuts).forEach(action => {
+                WFshortcuts.activateKey(action)
             });
         }
     }
