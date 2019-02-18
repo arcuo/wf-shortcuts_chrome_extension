@@ -6,62 +6,101 @@ import ReactDOM from 'react-dom';
 
 // Current editable shortcut names:
 var currentShortcuts = [];
-currentShortcuts[0] = "switch-to-own-user";
+currentShortcuts.push("switch-to-own-user");
+
+console.log(localStorage.shortcuts)
 
 var shortcutsDown = JSON.parse(localStorage.shortcuts);
-
-console.log(Object.keys(shortcutsDown));
 
 let updateShortcut = (shortcut, newKey) => {
     shortcutsDown[shortcut] = newKey
     localStorage.shortcuts = JSON.stringify(shortcutsDown)
-    console.log("local value: " + shortcutsDown[shortcut])
-    console.log("Storage: " + localStorage.shortcuts)
-    console.log("Storage: " + JSON.parse(localStorage.shortcuts)[shortcut])
 }
 
 class Shortcut extends Component {
 
     constructor(props) {
         super(props);
+        this.shortcutKeyOld = this.props.shortcutKey;
         this.state = {
             shortcutKey: this.props.shortcutKey,
-            editing: false, 
-            editButtonLabel: "Edit"
+            editing: false,
+            editClass: ""
         }
         this._edit = this._edit.bind(this);
-        this._saveNewValue = this._saveNewValue.bind(this);
+        this._cancelEdit = this._cancelEdit.bind(this);
+        this._recordNewShortcut = this._recordNewShortcut.bind(this);
+        this._setRecordedSequence = this._setRecordedSequence.bind(this);
     }
 
     _edit() {
-        let newLabel = this.state.editing ?  "Edit" : "Save"
+        if (!this.state.editing) {
+            this.setState((prevState) => {
+                this.shortcutKeyOld = prevState.shortcutKey;
+                return {
+                    editing: !prevState.editing,
+                    editClass: " editing"
+
+                }
+            });
+        } else {
+            // Saving new value.
+            updateShortcut(this.props.title, this.state.shortcutKey)
+            this.setState(prevState => ({
+                editing: !prevState.editing,
+                editClass: ""
+            }));
+        }
+    }
+
+    _cancelEdit() {
+        
         this.setState(prevState => ({
+            shortcutKey: this.shortcutKeyOld,
             editing: !prevState.editing,
-            editButtonLabel: newLabel
+            editClass: ""
         }));
     }
 
-    _saveNewValue(e) {
-        this.setState({shortcutKey: e.target.value})
-        updateShortcut(this.props.title, e.target.value)
+    _setRecordedSequence(sequence) {
+        this.setState({shortcutKey: sequence.join(' ')})
+    }
+
+    _recordNewShortcut() {
+        this.setState({
+            shortcutKey: "Record new shortcut"
+        })
+        Mousetrap.record(this._setRecordedSequence)
     }
 
     render() {
         return (
-            <div className="shortcut-set">
+            <div className="shortcut-wrapper">
                 <div className="shortcut-title">{this.props.title}</div>
-                <input className="shortcut-key" value={this.state.shortcutKey} readOnly={!this.state.editing} onChange={this._saveNewValue}/>
-                <button className="shortcut-edit-button" onClick={this._edit}>
-                    {this.state.editButtonLabel}
-                </button>
+                <p className={"shortcut-key" + this.state.editClass}>{this.state.shortcutKey}</p>
+                {!this.state.editing ? 
+                    <button className="shortcut-button edit" onClick={this._edit}>Edit</button> :
+                    <div className="shortcut-edit-button-wrapper">
+                        <button className="shortcut-button record" onClick={this._recordNewShortcut}>Record</button>
+                        <button className="shortcut-button save" onClick={this._edit}>Save</button>
+                        <button className="shortcut-button cancel" onClick={this._cancelEdit}>Cancel</button>
+                    </div>
+                    }
             </div>
         )
     }
 }
 
 class ShortcutSettings extends Component {
-
+    render() {
+        return (
+            <div className="shortcut-group">
+                <Shortcut title={currentShortcuts[0]} shortcutKey={shortcutsDown[currentShortcuts[0]]} />
+                <Shortcut title={currentShortcuts[0]} shortcutKey={shortcutsDown[currentShortcuts[0]]} />
+            </div>
+        )
+    }
 }
 
-ReactDOM.render(<Shortcut title={currentShortcuts[0]} shortcutKey={shortcutsDown[currentShortcuts[0]]} />,
+ReactDOM.render(<ShortcutSettings />,
      document.getElementById('react'));
