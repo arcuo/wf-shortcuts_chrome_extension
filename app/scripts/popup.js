@@ -4,13 +4,8 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 
-// Current editable shortcut names:
-var currentShortcuts = [];
-currentShortcuts.push("switch-to-own-user");
-
-console.log(localStorage.shortcuts)
-
 var shortcutsDown = JSON.parse(localStorage.shortcuts);
+var currentShortcuts = Object.keys(shortcutsDown);
 
 let updateShortcut = (shortcut, newKey) => {
     shortcutsDown[shortcut] = newKey
@@ -96,7 +91,10 @@ class ShortcutSettings extends Component {
         return (
             <div className="shortcut-group">
                 <Shortcut title={currentShortcuts[0]} shortcutKey={shortcutsDown[currentShortcuts[0]]} />
-                <Shortcut title={currentShortcuts[0]} shortcutKey={shortcutsDown[currentShortcuts[0]]} />
+                <Shortcut title={currentShortcuts[1]} shortcutKey={shortcutsDown[currentShortcuts[1]]} />
+                <Shortcut title={currentShortcuts[2]} shortcutKey={shortcutsDown[currentShortcuts[2]]} />
+                <Shortcut title={currentShortcuts[3]} shortcutKey={shortcutsDown[currentShortcuts[3]]} />
+                <Shortcut title={currentShortcuts[4]} shortcutKey={shortcutsDown[currentShortcuts[5]]} />
             </div>
         )
     }

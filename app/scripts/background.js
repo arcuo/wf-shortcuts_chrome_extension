@@ -258,11 +258,31 @@ console.log("Background script initiated");
 
 let savedId = null;
 
-// Testing storage of keys.
-let test_storage = {"switch-to-own-user": "alt+shift+6"};
+// Setup local storage:
 
-localStorage.clear()
-localStorage.shortcuts = JSON.stringify(test_storage);
+// Current editable shortcut names:
+var currentShortcuts = [];
+currentShortcuts.push("switch-to-own-user");
+currentShortcuts.push("to-super-page-original");
+currentShortcuts.push("to-manager-page-original");
+currentShortcuts.push("to-assessor-page-original");
+currentShortcuts.push("to-participant-page-original");
+
+var currentInStore = JSON.parse(localStorage.shortcuts);
+if (currentInStore === null || Object.keys(currentInStore) != 5) {
+    let shortcuts = {
+        "switch-to-own-user": "",
+        "to-super-page-original": "",
+        "to-manager-page-original": "",
+        "to-assessor-page-original": "",
+        "to-participant-page-original": ""
+    };
+    localStorage.shortcuts = JSON.stringify(shortcuts);
+} else {
+
+}
+
+
 
 chrome.commands.onCommand.addListener(function (command) {
     console.log("Recieved action: " + command);
