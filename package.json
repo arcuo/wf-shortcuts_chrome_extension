@@ -1,7 +1,7 @@
 {
   "name": "WF-shortcuts",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Custom keyboard shortcuts for navigating WISEflow roles and pages.",
   "scripts": {
     "start": "npm run dev:chrome",
