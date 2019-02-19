@@ -4,7 +4,10 @@
 /*
 All the shortcut command calls.
 */
-//TODO: make options page to change shortcuts.
+//TODO: Default settings
+//TODO: Update style
+//TODO: Better record option
+//TODO: Optimise shortcut storage.
 //TODO: Check for deleting content (also from manifest).
 
 let getFlowID = (url) => {
