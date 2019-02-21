@@ -1,3 +1,7 @@
+body {
+    font-family: 'Signika', sans-serif;
+}
+
 .shortcut-group {
     border-radius: 4px;
     margin-bottom: 10px;
@@ -8,6 +12,7 @@
 
 .shortcut-wrapper {
     display: block;
+    border-radius: 4px;
     text-align: center;
     position: relative;
     padding: 10px 15px;
@@ -24,11 +29,42 @@
     width: 80%;
 }
 
-.shortcut-key {
-    text-align: center;
-}
-
 .shortcut-key.editing {
     border-color: #66afe9;
     box-shadow: 0 0 0 3px rgba(102,175,233,.5);
+}
+
+.btn:hover {
+    box-shadow: inset 0 0 0 2em rgb(122, 204, 83);
+    border-color: rgb(104, 197, 61);
+    color: rgb(122, 204, 83);
+}
+
+.btn {
+    font-family: 'Signika', sans-serif;
+    font-weight: 600;
+    color: rgb(0, 0, 0);
+    transition: 0.25s;
+    background: none;
+    border: 2px solid #e6e6e6;
+    line-height: 1;
+    margin: 0px 3px;
+
+    &:hover {
+        color: #fff;
+    }
+}
+
+.record {
+    color: rgb(255, 0, 0);
+    border: 2px solid #ff0000
+}
+
+.record:focus {
+    box-shadow: none;
+}
+
+p.warning {
+    color: red;
+    font-weight: 600;
 }
