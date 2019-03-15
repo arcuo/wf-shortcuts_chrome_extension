@@ -17,9 +17,8 @@ let getFlowID = (url) => {
 };
 
 let findBranchURL = (url) => {
-    let re = RegExp("(europe|europe-stage|europe-test).wiseflow.net");
+    let re = RegExp("(https\:\/\/)?((europe|europe-stage|europe-test).wiseflow.net|localhost:8000)");
     let branch = re.exec(url);
-    console.log(branch)
     if (branch !== null) {
         return branch[0];
     }
@@ -61,8 +60,10 @@ let checkMissingID = (id) => {
 }
 
 let isSamePage = (url, role) => {
-    let re = RegExp("wiseflow.net/(.*)/")
-    return role == re.exec(url)[1];
+    let re = RegExp("(wiseflow.net|localhost:8000)/(.*)/")
+    let re_display = RegExp("display.php")
+
+    return re_display.test(url) && role === re.exec(url)[2];
 }
 
 let searchForGoSwitchBack = () => {
@@ -83,7 +84,7 @@ let switchUserGoTo = (id, flowId, role, branch) => {
 
             chrome.tabs.update(
                 id,
-                {url: "https://" + branch + "/index.php?switchUser=true"}
+                {url: branch + "/index.php?switchUser=true"}
             )
 
             let listener = (tabId, info) => {
@@ -91,7 +92,7 @@ let switchUserGoTo = (id, flowId, role, branch) => {
                     chrome.tabs.onUpdated.removeListener(listener);
                     chrome.tabs.update(
                         id,
-                        {url: "https://" + branch + "/" + role + "/display.php?id=" + flowId}
+                        {url: branch + "/" + role + "/display.php?id=" + flowId}
                     )
                 }
             }
@@ -100,7 +101,7 @@ let switchUserGoTo = (id, flowId, role, branch) => {
         } else {
             chrome.tabs.update(
                 id,
-                {url: "https://" + branch + "/" + role + "/display.php?id=" + flowId}
+                {url: branch + "/" + role + "/display.php?id=" + flowId}
             )
         }
 
@@ -119,7 +120,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
             if (!isSamePage(url, "manager")) {
                 chrome.tabs.update(
                     id,
-                    {url: "https://" + branch + "/manager/display.php?id=" + flowId}
+                    {url: branch + "/manager/display.php?id=" + flowId}
                 )
             }
         }
@@ -142,7 +143,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
             if (!isSamePage(url, "assessor")) {
                 chrome.tabs.update(
                     id,
-                    {url: "https://" + branch + "/manager/display.php?id=" + flowId}
+                    {url: branch + "/manager/display.php?id=" + flowId}
                 )
             }
         }
@@ -150,10 +151,8 @@ let commandHandler = (command, url, id, flowId, branch) => {
     } else if (command === "to-assessor-page-original") {
 
         if (checkMissingID(flowId)) {
-            console.log("here1")
             return;
         } else {
-            console.log("here2")
             if (!isSamePage(url, "assessor")) {
                 switchUserGoTo(id, flowId, "assessor", branch)
             }
@@ -167,7 +166,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
             if (!isSamePage(url, "participant")) {
                 chrome.tabs.update(
                     id,
-                    {url: "https://" + branch + "/manager/display.php?id=" + flowId}
+                    {url: branch + "/manager/display.php?id=" + flowId}
                 )
             }
         }
@@ -187,7 +186,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
         if (checkMissingID(flowId)) {
             chrome.tabs.update(
                 id,
-                {url: "https://" + branch + "/admin/super"}
+                {url: branch + "/admin/super"}
             )
             return;
         } else {
@@ -211,7 +210,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
 
                     chrome.tabs.update(
                         id,
-                        {url: "https://" + branch + "/index.php?switchUser=true"}
+                        {url: branch + "/index.php?switchUser=true"}
                     )
 
                     let listener = (tabId, info) => {
@@ -219,9 +218,8 @@ let commandHandler = (command, url, id, flowId, branch) => {
                             chrome.tabs.onUpdated.removeListener(listener);
                             chrome.tabs.update(
                                 id,
-                                {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
+                                {url: branch + "/admin/super/flow/index.php?id=" + flowId}
                             )
-                            console.log('here')
 
                             chrome.tabs.onUpdated.addListener(focusListener);
                         }
@@ -231,7 +229,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
                 } else {
                     chrome.tabs.update(
                         id,
-                        {url: "https://" + branch + "/admin/super/flow/index.php?id=" + flowId}
+                        {url: branch + "/admin/super/flow/index.php?id=" + flowId}
                     )
                     chrome.tabs.onUpdated.addListener(focusListener);
                 }
@@ -250,8 +248,7 @@ let savedId = null;
 
 chrome.commands.onCommand.addListener(function (command) {
 
-    console.log("command");
-    console.log(command);
+    console.log("command: " + command);
 
     chrome.tabs.query({
         active: true,
@@ -262,7 +259,7 @@ chrome.commands.onCommand.addListener(function (command) {
         let url = tab.url;
         let id = tab.id;
 
-        if (url.search("wiseflow.net") === -1) {
+        if (url.search("(wiseflow.net|localhost:8000)") === -1) {
             chrome.notifications.clear("not_wiseflow");
             chrome.notifications.create("not_wiseflow", {
                 type: "basic",
@@ -278,6 +275,8 @@ chrome.commands.onCommand.addListener(function (command) {
         let flowId = getFlowID(url);
         if (useSavedID(flowId)) {
             flowId = savedId;
+            console.log(savedId)
+            console.log(flowId)
         }
         let branch = findBranchURL(url);
 
