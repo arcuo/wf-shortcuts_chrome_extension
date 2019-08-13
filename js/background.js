@@ -186,7 +186,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
         if (checkMissingID(flowId)) {
             chrome.tabs.update(
                 id,
-                {url: branch + "/admin/super"}
+                {url: branch + '/admin/super'}
             )
             return;
         } else {
