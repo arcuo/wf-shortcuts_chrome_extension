@@ -5,19 +5,24 @@ All the shortcut command calls.
 //TODO: make options page to change shortcuts.
 //TODO: Check for deleting content (also from manifest).
 
+
+const DISPLAY_STR = "/display.php?id=";
+const FLOWID_RE = "\\??(flowId|id|flow)(/|=)([0-9]+)"
+
 let getFlowID = (url) => {
-    let re = RegExp("\\?(flowId|id)=([0-9]*)", "g");
+    let re = RegExp(FLOWID_RE, "g");
     let flowId = re.exec(url);
+    console.log("Found ID: '" + flowId[3] + "'")
     if (flowId === null) {
         return "ID missing";
     } else {
-        savedId = flowId[2]
-        return flowId[2];
+        savedId = flowId[3]
+        return flowId[3];
     }
 };
 
 let findBranchURL = (url) => {
-    let re = RegExp("(https\:\/\/)?((europe|europe-stage|europe-test).wiseflow.net|localhost:8000)");
+    let re = RegExp("(https\:\/\/)?((europe|europe-stage|europe-test).wiseflow.net|localhost:8000|http://local.wiseflow.net:8000)");
     let branch = re.exec(url);
     if (branch !== null) {
         return branch[0];
@@ -60,7 +65,7 @@ let checkMissingID = (id) => {
 }
 
 let isSamePage = (url, role) => {
-    let re = RegExp("(wiseflow.net|localhost:8000)/(.*)/")
+    let re = RegExp("(wiseflow.net|localhost:8000|http://local.wiseflow.net:8000)/(.*)/")
     let re_display = RegExp("display.php")
 
     return re_display.test(url) && role === re.exec(url)[2];
@@ -92,7 +97,7 @@ let switchUserGoTo = (id, flowId, role, branch) => {
                     chrome.tabs.onUpdated.removeListener(listener);
                     chrome.tabs.update(
                         id,
-                        {url: branch + "/" + role + "/display.php?id=" + flowId}
+                        {url: branch + "/" + role + DISPLAY_STR + flowId}
                     )
                 }
             }
@@ -101,7 +106,7 @@ let switchUserGoTo = (id, flowId, role, branch) => {
         } else {
             chrome.tabs.update(
                 id,
-                {url: branch + "/" + role + "/display.php?id=" + flowId}
+                {url: branch + "/" + role + DISPLAY_STR + flowId}
             )
         }
 
@@ -120,7 +125,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
             if (!isSamePage(url, "manager")) {
                 chrome.tabs.update(
                     id,
-                    {url: branch + "/manager/display.php?id=" + flowId}
+                    {url: branch + "/manager" + DISPLAY_STR + flowId}
                 )
             }
         }
@@ -143,7 +148,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
             if (!isSamePage(url, "assessor")) {
                 chrome.tabs.update(
                     id,
-                    {url: branch + "/manager/display.php?id=" + flowId}
+                    {url: branch + "/manager" + DISPLAY_STR + flowId}
                 )
             }
         }
@@ -166,7 +171,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
             if (!isSamePage(url, "participant")) {
                 chrome.tabs.update(
                     id,
-                    {url: branch + "/manager/display.php?id=" + flowId}
+                    {url: branch + "/manager" + DISPLAY_STR + flowId}
                 )
             }
         }
@@ -259,7 +264,7 @@ chrome.commands.onCommand.addListener(function (command) {
         let url = tab.url;
         let id = tab.id;
 
-        if (url.search("(wiseflow.net|localhost:8000)") === -1) {
+        if (url.search("(wiseflow.net|localhost:8000|http://local.wiseflow.net:8000)") === -1) {
             chrome.notifications.clear("not_wiseflow");
             chrome.notifications.create("not_wiseflow", {
                 type: "basic",
