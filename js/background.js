@@ -12,10 +12,10 @@ const FLOWID_RE = "\\??(flowId|id|flow)(/|=)([0-9]+)"
 let getFlowID = (url) => {
     let re = RegExp(FLOWID_RE, "g");
     let flowId = re.exec(url);
-    console.log("Found ID: '" + flowId[3] + "'")
     if (flowId === null) {
         return "ID missing";
     } else {
+        console.log("Found ID: '" + flowId[3] + "'")
         savedId = flowId[3]
         return flowId[3];
     }
