@@ -8,6 +8,8 @@ All the shortcut command calls.
 
 const DISPLAY_STR = "/display.php?id=";
 const FLOWID_RE = "\\??(flowId|id|flow)(/|=)([0-9]+)"
+const localhost_urls = "localhost:[0-9]+|http://local.wiseflow.net:[0-9]+"
+const europe_urls = "europe|europe-stage|europe-test"
 
 let getFlowID = (url) => {
     let re = RegExp(FLOWID_RE, "g");
@@ -22,7 +24,7 @@ let getFlowID = (url) => {
 };
 
 let findBranchURL = (url) => {
-    let re = RegExp("(https\:\/\/)?((europe|europe-stage|europe-test).wiseflow.net|localhost:8000|http://local.wiseflow.net:8000)");
+    let re = RegExp(`(https\:\/\/)?((${europe_urls}).wiseflow.net|${localhost_urls})`);
     let branch = re.exec(url);
     if (branch !== null) {
         return branch[0];
@@ -65,7 +67,7 @@ let checkMissingID = (id) => {
 }
 
 let isSamePage = (url, role) => {
-    let re = RegExp("(wiseflow.net|localhost:8000|http://local.wiseflow.net:8000)/(.*)/")
+    let re = RegExp(`(wiseflow.net|${localhost_urls})/(.*)/`)
     let re_display = RegExp("display.php")
 
     return re_display.test(url) && role === re.exec(url)[2];
@@ -264,7 +266,7 @@ chrome.commands.onCommand.addListener(function (command) {
         let url = tab.url;
         let id = tab.id;
 
-        if (url.search("(wiseflow.net|localhost:8000|http://local.wiseflow.net:8000)") === -1) {
+        if (url.search(`(wiseflow.net|${localhost_urls})`) === -1) {
             chrome.notifications.clear("not_wiseflow");
             chrome.notifications.create("not_wiseflow", {
                 type: "basic",
