@@ -47,15 +47,6 @@
     "persistent": true
   },
 
-  "content_scripts": [
-    {
-      "matches": ["https://europe.wiseflow.net/*"],
-      "js": [
-        "js/content.js"
-      ]
-    }
-  ],
-
   "permissions": [
     "tabs",
     "activeTab",
