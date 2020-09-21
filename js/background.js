@@ -176,7 +176,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
     }
   } else if (command === "to-super-page-original") {
     if (checkMissingID(flowId)) {
-      chrome.tabs.update(id, { url: branch + "/admin/super" });
+      chrome.tabs.update(id, { url: branch + "/admin/super/" });
       return;
     } else {
       // Check for switch back user element and go back if necessary
