@@ -1,9 +1,7 @@
 /*
 All the shortcut command calls.
  */
-//TODO: Make work with stage and test.
 //TODO: make options page to change shortcuts.
-//TODO: Check for deleting content (also from manifest).
 
 const DISPLAY_STR = "/display.php?id=";
 const FLOWID_RE = "\\??(flowId|id|flow)(/|=)([0-9]+)";
