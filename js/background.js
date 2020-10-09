@@ -196,7 +196,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
 
           if (result[0] !== null) {
             chrome.tabs.update(id, {
-              url: branch + "/index.php?switchUser=true",
+              url: branch + "/controller/admin/login.php?switchUser=true",
             });
 
             let listener = (tabId, info) => {
