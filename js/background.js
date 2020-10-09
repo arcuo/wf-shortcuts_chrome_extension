@@ -82,7 +82,8 @@ let searchForGoSwitchBack = () => {
 };
 
 let superFieldFocus = () => {
-  document.querySelector('input[id="flowid"]').focus().select();
+  console.log(document.querySelector('input[id="flowid"]'))
+  document.querySelector('input[id="flowid"]').select();
 };
 
 let switchUserGoTo = (id, flowId, role, branch) => {
