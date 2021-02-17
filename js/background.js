@@ -4,7 +4,7 @@ All the shortcut command calls.
 //TODO: make options page to change shortcuts.
 
 const DISPLAY_STR = "/display.php?id=";
-const FLOWID_RE = "\\??(flowId|id|flow)(/|=)([0-9]+)";
+const FLOWID_RE = "\\??(flowId|id|flow|scoreboard)(/|=)([0-9]+)";
 const localhost_urls = "localhost:[0-9]+|http://local.wiseflow.net:[0-9]+";
 const europe_urls = "europe|europe-stage|europe-test";
 
