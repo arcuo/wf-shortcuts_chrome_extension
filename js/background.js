@@ -78,7 +78,9 @@ let isSamePage = (url, role) => {
 const switchUserString = "/login.php?switchUser=true";
 
 let searchForGoSwitchBack = () => {
-  return document.querySelector(`a[href$="/login.php?switchUser=true"]`);
+  let foundSwitchBack = document.querySelector(`a[href$="/login.php?switchUser=true"]`) ? true : false;
+  console.log(`WF shortcuts: ${foundSwitchBack ? 'found switchback' : 'found no switchback'}`);
+  return foundSwitchBack;
 };
 
 let superFieldFocus = () => {
@@ -94,7 +96,7 @@ let switchUserGoTo = (id, flowId, role, branch) => {
       code: "(" + searchForGoSwitchBack + ")();",
     },
     (result) => {
-      if (result[0] !== null) {
+      if (result[0]) {
         chrome.tabs.update(id, {
           url: `${branch}/controller/admin/${switchUserString}`,
         });
@@ -195,7 +197,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
             }
           };
 
-          if (result[0] !== null) {
+          if (result[0]) {
             chrome.tabs.update(id, {
               url: branch + "/controller/admin/login.php?switchUser=true",
             });
