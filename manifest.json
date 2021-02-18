@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Benjamins WISEflow shortcuts",
-  "version": "1.0.3",
+  "version": "1.0.4",
 
   "icons": {"128": "images/extension_icon.png"},
   "browser_action": {
