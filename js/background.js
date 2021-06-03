@@ -8,6 +8,10 @@ const FLOWID_RE = "\\??(flowId|id|flow|scoreboard)(/|=)([0-9]+)";
 const localhost_urls = "localhost:[0-9]+|http://local.wiseflow.net:[0-9]+";
 const europe_urls = "europe|europe-stage|europe-test";
 
+if (!chrome.cookies) {
+  chrome.cookies = chrome.experimental.cookies;
+}
+
 let getFlowID = (url) => {
   let re = RegExp(FLOWID_RE, "g");
   let flowId = re.exec(url);
@@ -78,46 +82,50 @@ let isSamePage = (url, role) => {
 const switchUserString = "/login.php?switchUser=true";
 
 let searchForGoSwitchBack = () => {
-  let foundSwitchBack = document.querySelector(`a[href$="/login.php?switchUser=true"]`) ? true : false;
-  console.log(`WF shortcuts: ${foundSwitchBack ? 'found switchback' : 'found no switchback'}`);
+  let foundSwitchBack = document.querySelector(
+    `a[href$="/login.php?switchUser=true"]`
+  )
+    ? true
+    : false;
+  console.log(
+    `WF shortcuts: ${
+      foundSwitchBack ? "found switchback" : "found no switchback"
+    }`
+  );
   return foundSwitchBack;
 };
 
 let superFieldFocus = () => {
-  console.log(document.querySelector('input[id="flowid"]'))
+  console.log(document.querySelector('input[id="flowid"]'));
   document.querySelector('input[id="flowid"]').select();
 };
 
-let switchUserGoTo = (id, flowId, role, branch) => {
+let switchUserGoTo = (id, flowId, role, branch, url) => {
   // Check for switch back user element and go back if necessary
-  chrome.tabs.executeScript(
-    id,
-    {
-      code: "(" + searchForGoSwitchBack + ")();",
-    },
-    (result) => {
-      if (result[0]) {
-        chrome.tabs.update(id, {
-          url: `${branch}/controller/admin/${switchUserString}`,
-        });
+  chrome.cookies.getAll({ name: "wf-admin-login" }, function (cookies) {
+    if (cookies.length) {
+      console.log('Admin login found');
+      chrome.tabs.update(id, {
+        url: `${branch}/controller/admin/${switchUserString}`,
+      });
 
-        let listener = (tabId, info) => {
-          if (info.status === "complete" && tabId === id) {
-            chrome.tabs.onUpdated.removeListener(listener);
-            chrome.tabs.update(id, {
-              url: branch + "/" + role + DISPLAY_STR + flowId,
-            });
-          }
-        };
+      let listener = (tabId, info) => {
+        if (info.status === "complete" && tabId === id) {
+          chrome.tabs.onUpdated.removeListener(listener);
+          chrome.tabs.update(id, {
+            url: `${branch}/${url ? url : role + DISPLAY_STR + flowId}`,
+          });
+        }
+      };
 
-        chrome.tabs.onUpdated.addListener(listener);
-      } else {
-        chrome.tabs.update(id, {
-          url: branch + "/" + role + DISPLAY_STR + flowId,
-        });
-      }
+      chrome.tabs.onUpdated.addListener(listener);
+    } else {
+      console.log('No admin login found');
+      chrome.tabs.update(id, {
+        url: `${branch}/${url ? url : role + DISPLAY_STR + flowId}`,
+      });
     }
-  );
+  });
 };
 
 let commandHandler = (command, url, id, flowId, branch) => {
@@ -177,51 +185,21 @@ let commandHandler = (command, url, id, flowId, branch) => {
     }
   } else if (command === "to-super-page-original") {
     if (checkMissingID(flowId)) {
-      chrome.tabs.update(id, { url: branch + "/admin/super/" });
+      switchUserGoTo(id, flowId, "", branch, "admin/super");
       return;
     } else {
       // Check for switch back user element and go back if necessary
 
-      chrome.tabs.executeScript(
-        id,
-        {
-          code: "(" + searchForGoSwitchBack + ")();",
-        },
-        (result) => {
-          let focusListener = (tabId, info) => {
-            if (info.status === "complete" && tabId === id) {
-              chrome.tabs.onUpdated.removeListener(focusListener);
-              chrome.tabs.executeScript(id, {
-                code: "(" + superFieldFocus + ")();",
-              });
-            }
-          };
-
-          if (result[0]) {
-            chrome.tabs.update(id, {
-              url: branch + "/controller/admin/login.php?switchUser=true",
-            });
-
-            let listener = (tabId, info) => {
-              if (info.status === "complete" && tabId === id) {
-                chrome.tabs.onUpdated.removeListener(listener);
-                chrome.tabs.update(id, {
-                  url: branch + "/admin/super/flow/index.php?id=" + flowId,
-                });
-
-                chrome.tabs.onUpdated.addListener(focusListener);
-              }
-            };
-
-            chrome.tabs.onUpdated.addListener(listener);
-          } else {
-            chrome.tabs.update(id, {
-              url: branch + "/admin/super/flow/index.php?id=" + flowId,
-            });
-            chrome.tabs.onUpdated.addListener(focusListener);
-          }
+      let focusListener = (tabId, info) => {
+        if (info.status === "complete" && tabId === id) {
+          chrome.tabs.onUpdated.removeListener(focusListener);
+          chrome.tabs.executeScript(id, {
+            code: "(" + superFieldFocus + ")();",
+          });
         }
-      );
+      };
+      switchUserGoTo(id, flowId, "", branch, `admin/super/flow/index.php?id=${flowId}`);
+      chrome.tabs.onUpdated.addListener(focusListener);
     }
   }
 };
