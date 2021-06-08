@@ -100,31 +100,41 @@ let superFieldFocus = () => {
   document.querySelector('input[id="flowid"]').select();
 };
 
-let switchUserGoTo = (id, flowId, role, branch, url) => {
-  // Check for switch back user element and go back if necessary
-  chrome.cookies.getAll({ name: "wf-admin-login" }, function (cookies) {
-    if (cookies.length) {
-      console.log('Admin login found');
-      chrome.tabs.update(id, {
-        url: `${branch}/controller/admin/${switchUserString}`,
-      });
+findHostName = () => {
+  return window.location.hostname;
+};
 
-      let listener = (tabId, info) => {
-        if (info.status === "complete" && tabId === id) {
-          chrome.tabs.onUpdated.removeListener(listener);
+let switchUserGoTo = (id, flowId, role, branch, url) => {
+  chrome.tabs.executeScript(id, { code: `(${findHostName})()` }, (r) => {
+    let domain = r[0];
+    // Check for switch back user element and go back if necessary
+    chrome.cookies.getAll(
+      { name: "wf-admin-login", domain: domain },
+      function (cookies) {
+        if (cookies.length) {
+          console.log("Admin login found", cookies);
+          chrome.tabs.update(id, {
+            url: `${branch}/controller/admin/${switchUserString}`,
+          });
+
+          let listener = (tabId, info) => {
+            if (info.status === "complete" && tabId === id) {
+              chrome.tabs.onUpdated.removeListener(listener);
+              chrome.tabs.update(id, {
+                url: `${branch}/${url ? url : role + DISPLAY_STR + flowId}`,
+              });
+            }
+          };
+
+          chrome.tabs.onUpdated.addListener(listener);
+        } else {
+          console.log("No admin login found");
           chrome.tabs.update(id, {
             url: `${branch}/${url ? url : role + DISPLAY_STR + flowId}`,
           });
         }
-      };
-
-      chrome.tabs.onUpdated.addListener(listener);
-    } else {
-      console.log('No admin login found');
-      chrome.tabs.update(id, {
-        url: `${branch}/${url ? url : role + DISPLAY_STR + flowId}`,
-      });
-    }
+      }
+    );
   });
 };
 
@@ -198,7 +208,13 @@ let commandHandler = (command, url, id, flowId, branch) => {
           });
         }
       };
-      switchUserGoTo(id, flowId, "", branch, `admin/super/flow/index.php?id=${flowId}`);
+      switchUserGoTo(
+        id,
+        flowId,
+        "",
+        branch,
+        `admin/super/flow/index.php?id=${flowId}`
+      );
       chrome.tabs.onUpdated.addListener(focusListener);
     }
   }
