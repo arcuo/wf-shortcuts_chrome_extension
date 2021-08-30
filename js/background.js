@@ -194,8 +194,8 @@ let commandHandler = (command, url, id, flowId, branch) => {
       }
     }
   } else if (command === "to-super-page-original") {
-    if (checkMissingID(flowId)) {
-      switchUserGoTo(id, flowId, "", branch, "admin/super");
+    if (checkMissingID(flowId) || isOnSuperFlowPage) {
+      switchUserGoTo(id, flowId, "", branch, "admin/super/");
       return;
     } else {
       // Check for switch back user element and go back if necessary
