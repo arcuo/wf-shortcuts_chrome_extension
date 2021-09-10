@@ -79,6 +79,10 @@ let isSamePage = (url, role) => {
   return re_display.test(url) && role === re.exec(url)[2];
 };
 
+let isOnSuperFlowPage = (url) => {
+  return /admin\/super\/flow/.test(url);
+};
+
 const switchUserString = "/login.php?switchUser=true";
 
 let searchForGoSwitchBack = () => {
@@ -194,7 +198,7 @@ let commandHandler = (command, url, id, flowId, branch) => {
       }
     }
   } else if (command === "to-super-page-original") {
-    if (checkMissingID(flowId) || isOnSuperFlowPage) {
+    if (checkMissingID(flowId) || isOnSuperFlowPage(url)) {
       switchUserGoTo(id, flowId, "", branch, "admin/super/");
       return;
     } else {
