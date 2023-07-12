@@ -8,7 +8,7 @@ const FLOWID_RE = "\\??(flowId|id|flow|scoreboard|assessment|reassess)(/|=)([0-9
 const localhost_urls = "localhost:[0-9]+|http://local.wiseflow.net:[0-9]+";
 const europe_urls = "europe|europe-stage|europe-test";
 
-const test = "test2"
+const test = "test3"
 
 if (!chrome.cookies) {
   chrome.cookies = chrome.experimental.cookies;
